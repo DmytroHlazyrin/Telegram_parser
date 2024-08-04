@@ -16,13 +16,13 @@ client = TelegramClient("session", API_ID, API_HASH)
 async def main():
     await client.start(PHONE_NUMBER)
 
-    # Получаем диалоги
+    # Get dialogs
     dialogs = await client.get_dialogs()
 
     for dialog in dialogs:
-        # Проверяем, является ли диалог личным чатом и есть ли непрочитанные сообщения
+        # Check if dialog is a user and has unread messages
         if dialog.is_user and dialog.unread_count > 0:
-            # Получаем непрочитанные сообщения
+            # Get unread messages from the dialog and save them to the database
             messages = await client.get_messages(dialog.id, limit=dialog.unread_count)
 
             for message in reversed(messages):
@@ -41,7 +41,7 @@ async def main():
                 db.add(db_message)
                 db.commit()
                 db.refresh(db_message)
-            # Отмечаем сообщения как прочитанные
+            # Mark dialog as read
             await client.send_read_acknowledge(dialog.id)
 
 
