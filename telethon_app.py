@@ -4,14 +4,13 @@ from database import get_db, init_db
 from models import Message
 from decouple import config
 
-# Вставьте ваши данные API ID и API Hash
 API_ID = config("API_ID")
 API_HASH = config("API_HASH")
 PHONE_NUMBER = config("PHONE_NUMBER")
 
 init_db()
 
-client = TelegramClient(PHONE_NUMBER, API_ID, API_HASH)
+client = TelegramClient("session", API_ID, API_HASH)
 
 
 async def main():
@@ -47,5 +46,14 @@ async def main():
 
 
 if __name__ == "__main__":
-    with client:
-        client.loop.run_until_complete(main())
+    import traceback
+
+    try:
+        with client:
+            client.loop.run_until_complete(main())
+        with open("/var/log/cron.log", "a") as log_file:
+            log_file.write("Script executed successfully\n")
+    except Exception as e:
+        with open("/var/log/cron.log", "a") as log_file:
+            log_file.write(f"Error: {str(e)}\n")
+            log_file.write("".join(traceback.format_exception(etype=type(e), value=e, tb=e.__traceback__)))

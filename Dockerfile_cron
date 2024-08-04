@@ -1,0 +1,21 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
+COPY . .
+
+
+RUN apt-get update && apt-get install -y cron procps
+
+
+COPY crontab /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
+RUN touch /var/log/cron.log
+RUN chmod 0644 /var/log/cron.log
+
+
+RUN crontab /etc/cron.d/crontab
+
+
+CMD cron && tail -f /var/log/cron.log
